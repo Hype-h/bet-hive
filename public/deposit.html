@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deposit Funds - Bet-hive</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Deposit Funds to Wallet</h2>
+    <input type="number" id="amount" placeholder="Amount" min="100" required />
+    <button onclick="pay()">Deposit</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.firebasestorage.app",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+
+    function pay() {
+      const amount = document.getElementById("amount").value;
+      if (!amount || amount < 100) {
+        alert("Please enter a valid amount (minimum 100).");
+        return;
+      }
+
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login first.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      FlutterwaveCheckout({
+        public_key: "YOUR_FLUTTERWAVE_PUBLIC_KEY",
+        tx_ref: "hypebet_" + Date.now(),
+        amount: amount,
+        currency: "USD",
+        customer: {
+          email: user.email,
+        },
+        callback: function (data) {
+          if (data.status === "successful") {
+            const userRef = db.collection("users").doc(user.uid);
+            userRef.get().then(doc => {
+              if (doc.exists) {
+                const currentBalance = doc.data().wallet_balance || 0;
+                userRef.update({
+                  wallet_balance: currentBalance + parseFloat(amount)
+                }).then(() => {
+                  document.getElementById("status").innerText = "Deposit successful! Wallet updated.";
+                });
+              }
+            });
+          } else {
+            document.getElementById("status").innerText = "Payment not completed.";
+          }
+        },
+        onclose: function () {
+          console.log("Payment closed");
+        },
+        customizations: {
+          title: "HypeBet Wallet Deposit",
+          description: "Add funds to your HypeBet wallet",
+          logo: "https://yourdomain.com/logo.png"
+        }
+      });
+    }
+  </script>
+</body>
+</html>

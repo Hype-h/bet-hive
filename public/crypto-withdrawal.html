@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Withdrawal - HypeBet</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Request Crypto Withdrawal</h2>
+    <input type="number" id="withdrawAmount" placeholder="Amount in USD" />
+    <input type="text" id="walletAddress" placeholder="Your Crypto Wallet Address" />
+    <label for="cryptoType">Cryptocurrency Type</label>
+    <select id="cryptoType">
+      <option value="btc">BTC</option>
+      <option value="eth">ETH</option>
+      <option value="usdttrc20">USDT (TRC20)</option>
+    </select>
+    <button onclick="submitCryptoWithdraw()">Request Withdrawal</button>
+    <p id="result"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.firebasestorage.app",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    window.submitCryptoWithdraw = async () => {
+      const amount = parseFloat(document.getElementById("withdrawAmount").value);
+      const address = document.getElementById("walletAddress").value;
+      const currency = document.getElementById("cryptoType").value;
+      const user = auth.currentUser;
+
+      if (!user) return alert("Login required.");
+
+      await addDoc(collection(db, "cryptoWithdrawals"), {
+        userId: user.uid,
+        userEmail: user.email,
+        address,
+        amount,
+        currency,
+        status: "pending",
+        requestedAt: serverTimestamp()
+      });
+
+      document.getElementById("result").innerText = "✅ Withdrawal request submitted.";
+    };
+  </script>
+</body>
+</html>

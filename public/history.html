@@ -1,0 +1,38 @@
+<!-- Same HTML head and style as leaderboard.html -->
+<h2>📘 My Bets</h2>
+<div id="history"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getFirestore, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+  const firebaseConfig = { /* same config */ };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return (window.location.href = "login.html");
+
+    const q = query(
+      collection(db, "games"),
+      where("user", "==", user.uid),
+      orderBy("timestamp", "desc")
+    );
+
+    const snapshot = await getDocs(q);
+    const container = document.getElementById("history");
+
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const item = document.createElement("div");
+      item.className = "entry";
+      item.innerHTML = `
+        <span>🕹 ${d.game}</span>
+        <span>${d.won ? "✅ Won" : "❌ Lost"} $${(d.won ? d.payout : d.bet).toFixed(2)}</span>
+      `;
+      container.appendChild(item);
+    });
+  });
+</script>

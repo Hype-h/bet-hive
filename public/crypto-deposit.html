@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deposit with Crypto - Bet-hive</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Deposit with Crypto</h2>
+    <input type="number" id="cryptoAmount" placeholder="Amount in USD" />
+    <label for="cryptoType">Cryptocurrency Type</label>
+    <select id="cryptoType">
+      <option value="btc">BTC</option>
+      <option value="eth">ETH</option>
+      <option value="usdttrc20">USDT (TRC20)</option>
+    </select>
+    <button onclick="payCrypto()">Pay with Crypto</button>
+    <p id="invoiceMessage"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    // ✅ Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.appspot.com",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+
+    // ✅ Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+      } else {
+        alert("⚠️ You must log in to make a deposit.");
+      }
+    });
+
+    // ✅ Pay with NowPayments + Firebase user
+    async function payCrypto() {
+      const amount = document.getElementById("cryptoAmount").value;
+      const currency = document.getElementById("cryptoType").value;
+
+      if (!currentUser) {
+        alert("❌ Please log in first.");
+        return;
+      }
+
+      const response = await fetch("https://api.nowpayments.io/v1/invoice", {
+        method: "POST",
+        headers: {
+          "x-api-key": "YJQW6EM-3MHM107-JFAK2G4-78NY64J",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          price_amount: parseFloat(amount),
+          price_currency: "usd",
+          pay_currency: currency,
+          ipn_callback_url: "https://us-central1-bet-hive-h.cloudfunctions.net/nowPaymentsWebhook", // ✅ Your live Firebase function
+          order_description: "HypeBet Wallet Topup",
+          is_fixed_rate: true,
+          order_id: currentUser.uid // ✅ Attach user ID
+        })
+      });
+
+      const data = await response.json();
+      if (data.invoice_url) {
+        document.getElementById("invoiceMessage").innerHTML =
+          `✅ Please complete payment: <br/><a href="${data.invoice_url}" target="_blank">${data.invoice_url}</a>`;
+      } else {
+        alert("❌ Error generating crypto invoice");
+        console.error(data);
+      }
+    }
+
+    // Make function available globally
+    window.payCrypto = payCrypto;
+  </script>
+</body>
+</html>

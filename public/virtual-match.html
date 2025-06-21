@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Match - Bet-hive</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #FF8C00, #FFA500);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #333;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #ff6f00;
+    }
+
+    #matchName {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 10px 0;
+      color: #444;
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      font-family: inherit;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    button {
+      background: #ff6f00;
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #e65c00;
+    }
+
+    #wallet {
+      font-weight: 600;
+      color: #008000;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 1.2rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🏟️ Virtual Match</h2>
+    <p>Your Wallet: <span id="wallet">Loading...</span> USD</p>
+    <div id="matchName">Generating match...</div>
+
+    <label for="prediction">Predict Team A Will:</label>
+    <select id="prediction">
+      <option value="win">Win</option>
+      <option value="draw">Draw</option>
+      <option value="lose">Lose</option>
+    </select>
+
+    <input type="number" id="betAmount" placeholder="Enter bet amount (USD)" />
+    <button onclick="predictMatch()">Place Bet</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.appspot.com",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser;
+
+    const teamNames = [
+      "Lions FC", "Storm United", "Falcons", "Warriors FC",
+      "Dragons", "Eagle Stars", "Thunderbolt", "Sharks FC",
+      "Galaxy FC", "Rising Suns"
+    ];
+
+    function getRandomMatch() {
+      const teamA = teamNames[Math.floor(Math.random() * teamNames.length)];
+      let teamB;
+      do {
+        teamB = teamNames[Math.floor(Math.random() * teamNames.length)];
+      } while (teamB === teamA);
+      return { teamA, teamB };
+    }
+
+    const match = getRandomMatch();
+    const matchName = `${match.teamA} vs ${match.teamB}`;
+    document.getElementById("matchName").innerText = matchName;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          document.getElementById("wallet").innerText = snap.data().wallet_balance.toFixed(2);
+        }
+      } else {
+        alert("Please log in to continue.");
+        window.location.href = "login.html";
+      }
+    });
+
+    async function predictMatch() {
+      const betAmount = parseFloat(document.getElementById("betAmount").value);
+      const prediction = document.getElementById("prediction").value;
+      const resultDiv = document.getElementById("result");
+
+      if (!betAmount || betAmount <= 0) return alert("Enter a valid bet amount.");
+
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      let wallet = userSnap.data().wallet_balance || 0;
+
+      if (betAmount > wallet) return alert("Insufficient balance.");
+
+      const outcomes = ["win", "draw", "lose"];
+      const actual = outcomes[Math.floor(Math.random() * outcomes.length)];
+      const won = actual === prediction;
+
+      const gameRef = doc(db, "games", `${Date.now()}_${currentUser.uid}`);
+      await setDoc(gameRef, {
+        user: currentUser.uid,
+        game: "virtual-match",
+        match: matchName,
+        prediction,
+        actual,
+        bet: betAmount,
+        won,
+        payout: won ? betAmount * 3 : 0,
+        timestamp: new Date()
+      });
+
+      if (won) {
+        await updateDoc(userRef, {
+          wallet_balance: wallet + betAmount * 3
+        });
+        resultDiv.innerHTML = `🎉 Correct! ${match.teamA} did <b>${actual.toUpperCase()}</b>. You won $${(betAmount * 3).toFixed(2)}!`;
+      } else {
+        await updateDoc(userRef, {
+          wallet_balance: wallet - betAmount
+        });
+        const adminStatsRef = doc(db, "adminStats", "main");
+        await setDoc(adminStatsRef, {
+          totalEarnings: increment(betAmount)
+        }, { merge: true });
+        resultDiv.innerHTML = `❌ ${match.teamA} did <b>${actual.toUpperCase()}</b>. You lost $${betAmount.toFixed(2)}.`;
+      }
+
+      const updatedSnap = await getDoc(userRef);
+      document.getElementById("wallet").innerText = updatedSnap.data().wallet_balance.toFixed(2);
+    }
+
+    window.predictMatch = predictMatch;
+  </script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+/* Base styles */
+:root {
+  --primary-color: #FFA500;
+  --text-dark: #333;
+  --text-light: #fff;
+  --bg-light: #f9f9f9;
+  --radius: 8px;
+  --shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Cross-browser selection rules */
+body, button, .btn, header, nav, .game-card {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem 0;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--primary-color);
+  padding: 1rem;
+  color: var(--text-light);
+}
+
+header .logo {
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+nav ul {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+}
+
+nav ul li a {
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: #fff;
+  margin: 4px 0;
+}
+
+.btn {
+  display: inline-block;
+  background: var(--primary-color);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+.btn:hover {
+  background: #e69500;
+}
+
+#backToTop {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--primary-color);
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  color: #fff;
+  cursor: pointer;
+  display: none;
+  z-index: 1000;
+}
+
+#backToTop.show {
+  display: block;
+}
+
+form {
+  max-width: 500px;
+  margin: 1rem auto;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  border-radius: var(--radius);
+  border: 1px solid #ddd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav ul {
+    display: none;
+    flex-direction: column;
+    background: var(--primary-color);
+    position: absolute;
+    top: 70px;
+    right: 0;
+    width: 60%;
+    padding: 1rem;
+  }
+
+  nav ul.active {
+    display: flex;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+}
+/* ====== Universal Reset ====== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ====== Global Styles ====== */
+body, html {
+  height: 100%;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #FF8C00, #FFA500);
+  color: #fff;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* ====== Anchor Tag Reset ====== */
+a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ====== Button Base ====== */
+.btn {
+  background-color: #fff;
+  color: #FFA500;
+  border: none;
+  padding: 1rem 2.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border-radius: 40px;
+  cursor: pointer;
+  text-align: center;
+  flex: 1 1 140px;
+  -webkit-user-select: none;
+  user-select: none;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Hover state */
+.btn:hover,
+.btn:focus {
+  background-color: #ffb84d;
+  color: #fff;
+  outline: none;
+}
+
+/* ====== Responsive Navigation & Elements ====== */
+header, nav, .hero, .features, .testimonials, .newsletter, footer {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Utility class for cards or panels */
+.card, .panel, .feature-item {
+  -webkit-user-select: none;
+  user-select: none;
+}
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #FFA500;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.container {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #ff6f00;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #e65c00;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+/* Spinner for wallet loading */
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #fff;
+  border-top: 3px solid #FFA500;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Withdrawal Requests - HypeBet</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #e67e00;
+      color: white;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .approve {
+      background-color: #27ae60;
+      color: white;
+    }
+    .reject {
+      background-color: #c0392b;
+      color: white;
+    }
+  </style>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import {
+      getFirestore, doc, getDoc, updateDoc,
+      collection, onSnapshot, orderBy, query
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.firebasestorage.app",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        alert("Login required.");
+        return window.location.href = "login.html";
+      }
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists || !userDoc.data().isAdmin) {
+        alert("Access denied. Only admins can view this page.");
+        return window.location.href = "dashboard.html";
+      }
+
+      loadRequests();
+    });
+
+    function loadRequests() {
+      const tbody = document.getElementById("requestsTable");
+      const q = query(collection(db, "withdrawals"), orderBy("requestedAt", "desc"));
+
+      onSnapshot(q, (snapshot) => {
+        tbody.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${data.userEmail}</td>
+            <td>${data.amount}</td>
+            <td>${data.accountInfo}</td>
+            <td>${data.status}</td>
+            <td>${data.requestedAt?.toDate().toLocaleString() || "N/A"}</td>
+            <td>
+              ${data.status === "pending" ? `
+                <button class="approve" onclick="updateStatus('${docSnap.id}', 'approved')">Approve</button>
+                <button class="reject" onclick="updateStatus('${docSnap.id}', 'rejected')">Reject</button>
+              ` : ''}
+            </td>`;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    window.updateStatus = async (docId, newStatus) => {
+      const withdrawalRef = doc(db, "withdrawals", docId);
+      const docSnap = await getDoc(withdrawalRef);
+      if (!docSnap.exists()) return;
+
+      const data = docSnap.data();
+
+      if (newStatus === "rejected") {
+        // Refund user
+        const userRef = doc(db, "users", data.userId);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists) {
+          const balance = userDoc.data().wallet_balance || 0;
+          await updateDoc(userRef, { wallet_balance: balance + data.amount });
+        }
+      }
+
+      await updateDoc(withdrawalRef, { status: newStatus });
+      alert(`Withdrawal ${newStatus}`);
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Admin Panel: Withdrawal Requests</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>User Email</th>
+          <th>Amount</th>
+          <th>Account Info</th>
+          <th>Status</th>
+          <th>Requested At</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="requestsTable"></tbody>
+    </table>
+  </div>
+</body>
+</html>

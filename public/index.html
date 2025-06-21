@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bet-Hive</title>
+
+  <style>
+    /* ====== Base Reset & Fonts ====== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+    body, html {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #FF8C00, #FFA500);
+      color: #fff;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    /* ====== Header & Navigation ====== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: rgba(255 165 0 / 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+
+    nav {
+      position: relative;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    nav ul li a {
+      font-weight: 600;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    nav ul li a:hover,
+    nav ul li a:focus {
+      color: #a16a43;
+      outline: none;
+    }
+
+    /* ====== Hamburger Menu (hidden on desktop) ====== */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      width: 25px;
+      height: 20px;
+      justify-content: space-between;
+      z-index: 1500;
+    }
+
+    .hamburger span {
+      height: 3px;
+      background: #ffffff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    /* ====== Responsive Menu Styling ====== */
+    @media (max-width: 860px) {
+      nav ul {
+        flex-direction: column;
+        position: fixed;
+        top: 65px;
+        right: 0;
+        background: rgba(153, 114, 42, 0.95);
+        width: 220px;
+        height: calc(100% - 65px);
+        padding-top: 2rem;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        border-radius: 8px 0 0 8px;
+      }
+
+      nav ul.active {
+        transform: translateX(0);
+      }
+
+      nav ul li {
+        margin-bottom: 1.8rem;
+        text-align: center;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+    }
+
+    /* Hamburger Animation */
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+
+    /* ====== Hero Section ====== */
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4rem 1.5rem 6rem;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      flex: 1 1 400px;
+      max-width: 600px;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    .hero-text h1 {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      margin-bottom: 1rem;
+      line-height: 1.1;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    }
+
+    .hero-text p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      margin-bottom: 2rem;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background-color: #fff;
+      color: #FFA500;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      text-align: center;
+      flex: 1 1 140px;
+      -webkit-user-select: none;
+      user-select: none;
+      box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
+    }
+
+    .btn:hover,
+    .btn:focus {
+      background-color: #ffb84d;
+      color: #fff;
+      outline: none;
+    }
+
+    .hero-image {
+      flex: 1 1 350px;
+      max-width: 450px;
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .hero-image img {
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* ====== Features Section ====== */
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 3rem 1.5rem;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+    }
+
+    .feature-item {
+      background: rgba(255 255 255 / 0.15);
+      border-radius: 15px;
+      padding: 2rem 1.5rem;
+      flex: 1 1 280px;
+      box-shadow: 0 0 25px rgba(255 140 0 / 0.3);
+      transition: background-color 0.3s ease;
+      cursor: default;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .feature-item:hover,
+    .feature-item:focus {
+      background: rgba(255 255 255 / 0.3);
+      outline: none;
+    }
+
+    .feature-item h3 {
+      margin-bottom: 1rem;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .feature-item p {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    /* ====== How It Works ====== */
+    .how-it-works {
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+
+    .how-it-works h2 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .step {
+      background: rgba(255 255 255 / 0.15);
+      padding: 1.5rem;
+      border-radius: 15px;
+      flex: 1 1 200px;
+      box-shadow: 0 0 15px rgba(121, 75, 19, 0.667);
+      cursor: default;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .step:hover,
+    .step:focus {
+      background: rgba(255 255 255 / 0.3);
+      outline: none;
+    }
+
+    .step h3 {
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .step p {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    /* ====== Testimonials ====== */
+    .testimonials {
+      background: rgba(255 165 0 / 0.15);
+      padding: 3rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .testimonials h2 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .testimonial-cards {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .testimonial {
+      background: rgba(255 255 255 / 0.25);
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255 140 0 / 0.3);
+      flex: 1 1 280px;
+      font-style: italic;
+      color: #fff;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .testimonial:hover,
+    .testimonial:focus {
+      background: rgba(255 255 255 / 0.4);
+      outline: none;
+    }
+
+    .author {
+      margin-top: 1rem;
+      font-weight: 700;
+      font-style: normal;
+      text-align: right;
+      font-size: 1rem;
+    }
+
+    /* ====== Newsletter ====== */
+    .newsletter {
+      max-width: 700px;
+      margin: 0 auto 5rem;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      background: rgba(255 255 255 / 0.15);
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(255 140 0 / 0.25);
+    }
+
+    .newsletter h2 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .newsletter p {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+
+    .newsletter form {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .newsletter input[type="email"] {
+      padding: 0.85rem 1.1rem;
+      font-size: 1rem;
+      border-radius: 40px;
+      border: none;
+      outline: none;
+      flex: 1 1 250px;
+      max-width: 100%;
+    }
+
+    .newsletter button {
+      background: #fff;
+      color: #FFA500;
+      border: none;
+      border-radius: 40px;
+      padding: 0.85rem 2rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      -webkit-user-select: none;
+      user-select: none;
+      flex: 0 0 auto;
+    }
+
+    .newsletter button:hover,
+    .newsletter button:focus {
+      background-color: #ffb84d;
+      color: #fff;
+      outline: none;
+    }
+
+    #newsletterMsg {
+      margin-top: 1rem;
+      font-weight: 600;
+      min-height: 1.2rem;
+      color: #ccffcc;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* ====== Video Demo ====== */
+    .video-demo {
+      max-width: 900px;
+      margin: 0 auto 5rem;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(255, 140, 0, 0.4);
+    }
+
+    .video-demo iframe {
+      width: 100%;
+      height: 280px;
+      border: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 600px) {
+      .video-demo iframe {
+        height: 500px;
+      }
+    }
+
+    /* ====== Footer ====== */
+    footer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      background: rgba(0, 0, 0, 0.15);
+      font-weight: 600;
+      font-size: 0.9rem;
+      -webkit-user-select: none;
+      user-select: none;
+      color: #fff9e1;
+    }
+
+    /* ====== Back to Top Button ====== */
+    #backToTop {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #fff;
+      color: #FFA500;
+      border: none;
+      border-radius: 50%;
+      padding: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      z-index: 1000;
+    }
+
+    #backToTop.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ====== Accessibility Focus Styles ====== */
+    a:focus, button:focus, input:focus {
+      outline: 3px solid #ffb84d;
+      outline-offset: 3px;
+    }
+
+    /* ====== Animations ====== */
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ====== Responsive tweaks ====== */
+    @media (max-width: 860px) {
+      .hero {
+        flex-direction: column;
+        padding: 3rem 1.5rem 5rem;
+        gap: 1.5rem;
+      }
+
+      nav ul {
+        flex-direction: column;
+        position: fixed;
+        top: 65px;
+        right: 0;
+        background: rgba(255, 165, 0, 0.95);
+        width: 220px;
+        height: calc(100% - 65px);
+        padding-top: 2rem;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        border-radius: 8px 0 0 8px;
+      }
+
+      nav ul.active {
+        transform: translateX(0);
+      }
+
+      nav ul li {
+        margin-bottom: 1.8rem;
+        text-align: center;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .btn {
+        width: 100%;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .newsletter form {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header role="banner" class="container">
+    <div class="logo" aria-label="Bet-Hive logo">BET-HIVE</div>
+
+    <div class="hamburger" aria-label="Toggle menu" role="button" tabindex="0" aria-expanded="false" aria-controls="primary-navigation">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <nav id="primary-navigation" aria-label="Primary navigation">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="login.html">Login</a></li>
+        <li><a href="signup.html">Sign Up</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero container" role="main" aria-label="Hero introduction">
+      <div class="hero-text">
+        <h1>Bet Smart, Win Big, Play Securely</h1>
+        <p>Join Bet-Hive today — the most trusted platform offering multiple games, multi-currency support, instant deposits & withdrawals, and a secure wallet system.</p>
+        <div class="hero-buttons">
+          <a href="signup.html" class="btn" role="button" aria-label="Sign up now">Sign Up</a>
+          <a href="login.html" class="btn" role="button" aria-label="Login to your account">Log In</a>
+        </div>
+      </div>
+      <div class="hero-image" aria-hidden="true">
+        <img src="https://images.unsplash.com/photo-1660629465812-1c550d2a2342?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8d2lubmVyfGVufDB8fDB8fHww" alt="Betting and winning concept" />
+      </div>
+    </section>
+
+    <section class="features container" aria-label="Platform features">
+      <article class="feature-item" tabindex="0">
+        <h3>Multiple Games</h3>
+        <p>Enjoy a wide variety of betting games: Dice, Coin Flip, Spin Wheel, Match Predictor, and more.</p>
+      </article>
+      <article class="feature-item" tabindex="0">
+        <h3>Multi-Currency Wallet</h3>
+        <p>Deposit and withdraw in different currencies, including crypto, with instant wallet updates.</p>
+      </article>
+      <article class="feature-item" tabindex="0">
+        <h3>Secure Transactions</h3>
+        <p>Powered by Firebase and advanced security rules, your funds and data are safe with us.</p>
+      </article>
+      <article class="feature-item" tabindex="0">
+        <h3>Responsive Design</h3>
+        <p>Use Bet-Hive anywhere — our platform is fully optimized for mobile and desktop devices.</p>
+      </article>
+    </section>
+
+    <section class="how-it-works container" aria-label="How Bet-Hive works">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <article class="step" tabindex="0">
+          <h3>Create Account</h3>
+          <p>Sign up quickly and securely with email or social login.</p>
+        </article>
+        <article class="step" tabindex="0">
+          <h3>Deposit Funds</h3>
+          <p>Use your preferred currency or crypto to fund your wallet instantly.</p>
+        </article>
+        <article class="step" tabindex="0">
+          <h3>Place Bets</h3>
+          <p>Choose your game and place bets with real-time updates and odds.</p>
+        </article>
+        <article class="step" tabindex="0">
+          <h3>Withdraw Winnings</h3>
+          <p>Withdraw your winnings instantly or keep playing for bigger rewards.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="testimonials container" aria-label="User testimonials">
+      <h2>What Our Players Say</h2>
+      <div class="testimonial-cards">
+        <blockquote class="testimonial" tabindex="0">
+          "Bet-Hive is my go-to platform for secure and fast betting. Love the variety of games and smooth wallet system!"
+          <footer class="author">– Sarah K.</footer>
+        </blockquote>
+        <blockquote class="testimonial" tabindex="0">
+          "Amazing customer support and reliable payouts. The mobile experience is fantastic!"
+          <footer class="author">– Mark T.</footer>
+        </blockquote>
+        <blockquote class="testimonial" tabindex="0">
+          "I enjoy the transparency and ease of use here. Highly recommended to anyone wanting a safe betting environment."
+          <footer class="author">– Priya S.</footer>
+        </blockquote>
+      </div>
+    </section>
+
+    <section class="newsletter container" aria-label="Newsletter signup">
+      <h2>Stay Updated</h2>
+      <p>Subscribe to our newsletter for the latest updates, promotions, and game releases.</p>
+      <form id="newsletterForm" aria-label="Newsletter subscription form">
+        <input
+          type="email"
+          id="emailInput"
+          name="email"
+          placeholder="Your email address"
+          required
+          aria-required="true"
+          aria-describedby="newsletterMsg"
+        />
+        <button type="submit" aria-label="Subscribe to newsletter">Subscribe</button>
+      </form>
+      <div id="newsletterMsg" aria-live="polite"></div>
+    </section>
+
+    <section class="video-demo container" aria-label="Demo video">
+      <iframe
+        src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+        title="Bet-Hive Demo Video"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    &copy; 2025 Bet-Hive. All rights reserved.
+  </footer>
+
+  <script>
+    // Hamburger toggle
+    const hamburger = document.querySelector('.hamburger');
+    const navUL = document.querySelector('nav ul');
+
+    hamburger.addEventListener('click', () => {
+      const expanded = hamburger.getAttribute('aria-expanded') === 'true' || false;
+      hamburger.setAttribute('aria-expanded', !expanded);
+      hamburger.classList.toggle('active');
+      navUL.classList.toggle('active');
+    });
+
+    // Accessibility: allow Enter/Space to toggle menu on keyboard focus
+    hamburger.addEventListener('keydown', (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        hamburger.click();
+      }
+    });
+
+    // Back to Top button
+    const backToTop = document.createElement('button');
+    backToTop.id = 'backToTop';
+    backToTop.setAttribute('aria-label', 'Back to top');
+    backToTop.innerHTML = '↑';
+    document.body.appendChild(backToTop);
+
+    backToTop.addEventListener('click', () => {
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+
+    window.addEventListener('scroll', () => {
+      if(window.scrollY > 300) {
+        backToTop.classList.add('show');
+      } else {
+        backToTop.classList.remove('show');
+      }
+    });
+
+    // Newsletter form handler (example)
+    const newsletterForm = document.getElementById('newsletterForm');
+    const newsletterMsg = document.getElementById('newsletterMsg');
+    newsletterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('emailInput').value;
+      // Here you would send email to your backend or email service
+      newsletterMsg.textContent = `Thanks for subscribing, ${email}!`;
+      newsletterForm.reset();
+    });
+  </script>
+
+</body>
+</html>

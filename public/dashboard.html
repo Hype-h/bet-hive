@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Bet-Hive</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="dashboard-container fade-in-up">
+    <header class="header">
+      <h1 class="logo bet-hive-logo">🐝 BET-HIVE</h1>
+      <p class="welcome-text">Welcome to your gaming dashboard</p>
+    </header>
+
+    <section class="wallet-section wallet-section-highlight">
+      <div class="wallet-label">Current Balance</div>
+      <div class="wallet-balance loading" id="walletBalance">
+        <span class="wallet-icon">💰</span>
+        <span id="walletAmount">
+          <div class="loading-spinner"></div>
+        </span>
+        <span class="wallet-currency">USD</span>
+      </div>
+    </section>
+
+    <section class="games-grid">
+      <div class="game-card orange-border" onclick="navigateToGame('dice.html')">
+        <span class="game-icon">🎲</span>
+        <h3 class="game-title">Dice Roll</h3>
+        <p class="game-description">Test your luck with classic dice betting</p>
+      </div>
+
+      <div class="game-card orange-border" onclick="navigateToGame('coinflip.html')">
+        <span class="game-icon">🪙</span>
+        <h3 class="game-title">Coin Flip</h3>
+        <p class="game-description">Heads or tails? Simple and exciting</p>
+      </div>
+
+      <div class="game-card orange-border" onclick="navigateToGame('virtual-match.html')">
+        <span class="game-icon">⚽</span>
+        <h3 class="game-title">Virtual Match</h3>
+        <p class="game-description">Bet on virtual sports matches</p>
+      </div>
+
+      <div class="game-card orange-border" onclick="navigateToGame('spin.html')">
+        <span class="game-icon">🎡</span>
+        <h3 class="game-title">Spin Wheel</h3>
+        <p class="game-description">Spin to win with multiple outcomes</p>
+      </div>
+    </section>
+
+    <footer class="logout-section">
+      <button class="logout-btn" onclick="logout()">
+        🚪 Logout
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h"
+    };
+
+    // Use compat libraries for backwards compatibility with namespaced syntax
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const walletBalanceEl = document.getElementById('walletBalance');
+    const walletAmountEl = document.getElementById('walletAmount');
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      loadUserData(user.uid);
+    });
+
+    async function loadUserData(userId) {
+      try {
+        const userDoc = await db.collection("users").doc(userId).get();
+        const userData = userDoc.data();
+        const balance = userData.wallet_balance || 0;
+
+        setTimeout(() => {
+          walletBalanceEl.classList.remove('loading');
+          walletAmountEl.innerHTML = `$${balance.toFixed(2)}`;
+        }, 600);
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        walletAmountEl.innerHTML = 'Error';
+      }
+    }
+
+    function navigateToGame(gameUrl) {
+      setTimeout(() => {
+        window.location.href = gameUrl;
+      }, 100);
+    }
+
+    async function logout() {
+      try {
+        await auth.signOut();
+        window.location.href = "login.html";
+      } catch (error) {
+        alert("Logout failed. Try again.");
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.game-card');
+      cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 200 + index * 100);
+      });
+    });
+  </script>
+</body>
+</html>

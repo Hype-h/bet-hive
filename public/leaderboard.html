@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard - HypeBet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      background: #FFA500;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .entry {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding: 0.5rem 0;
+    }
+    .entry:last-child {
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🏆 Recent Winners</h2>
+    <div id="leaderboard"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.appspot.com",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadLeaderboard() {
+      const q = query(
+        collection(db, "games"),
+        where("won", "==", true),
+        orderBy("timestamp", "desc"),
+        limit(10)
+      );
+
+      const snapshot = await getDocs(q);
+      const container = document.getElementById("leaderboard");
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const item = document.createElement("div");
+        item.className = "entry";
+        item.innerHTML = `
+          <span>🎮 ${d.game}</span>
+          <span>💰 Won $${d.payout.toFixed(2)}</span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    loadLeaderboard();
+  </script>
+</body>
+</html>

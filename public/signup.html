@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - Bet-Hive</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Your Account</h2>
+
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Password (min. 6 chars)" oninput="checkPasswordStrength()" required />
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+    
+    <div id="strengthMessage"></div>
+
+    <label for="currency">Select Currency</label>
+    <select id="currency" required>
+      <option value="" disabled selected>Choose your currency</option>
+      <option value="USD">USD ($)</option>
+      <option value="EUR">EUR (€)</option>
+      <option value="NGN">NGN (₦)</option>
+      <option value="GBP">GBP (£)</option>
+    </select>
+
+    <label class="checkbox">
+      <input type="checkbox" id="terms" />
+      I agree to the <a href="terms.html" target="_blank">Terms</a> & <a href="privacy.html" target="_blank">Privacy Policy</a>
+    </label>
+
+    <div class="g-recaptcha" data-sitekey="6LeYfGcrAAAAAH9WMMpVgowBt66Sv5kSPXJ299YY"></div>
+
+    <button onclick="signup()">Sign Up</button>
+    <p>Already have an account? <a href="login.html">Login</a></p>
+    <p id="error" class="error"></p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.appspot.com",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function checkPasswordStrength() {
+      const password = document.getElementById("password").value;
+      const msg = document.getElementById("strengthMessage");
+
+      if (password.length < 6) {
+        msg.textContent = "Password is too short.";
+        msg.style.color = "red";
+      } else if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        msg.textContent = "Include at least 1 uppercase and 1 number.";
+        msg.style.color = "orange";
+      } else {
+        msg.textContent = "Strong password!";
+        msg.style.color = "green";
+      }
+    }
+
+    function signup() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+      const currency = document.getElementById("currency").value;
+      const agreed = document.getElementById("terms").checked;
+      const errorDiv = document.getElementById("error");
+      errorDiv.textContent = "";
+
+      if (!currency) {
+        return errorDiv.textContent = "Please select a currency.";
+      }
+      if (!agreed) {
+        return errorDiv.textContent = "You must agree to the terms and privacy.";
+      }
+      if (password !== confirmPassword) {
+        return errorDiv.textContent = "Passwords do not match.";
+      }
+
+      grecaptcha.ready(() => {
+        grecaptcha.execute('YOUR_SITE_KEY_HERE', { action: 'submit' }).then(() => {
+          auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+              const user = userCredential.user;
+              user.sendEmailVerification();
+
+              return db.collection("users").doc(user.uid).set({
+                email: email,
+                currency: currency,
+                wallet_balance: 0,
+                isAdmin: false
+              });
+            })
+            .then(() => {
+              alert("Verification email sent! Please check your inbox.");
+              window.location.href = "login.html";
+            })
+            .catch((err) => {
+              errorDiv.textContent = err.message;
+            });
+        });
+      });
+    }
+  </script>
+</body>
+</html>

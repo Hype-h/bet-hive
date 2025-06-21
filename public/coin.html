@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coin Flip - HypeBet</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      background: #FFA500;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 0.5rem;
+    }
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background: #ff6f00;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #e65c00;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    #wallet {
+      font-weight: bold;
+      color: #008000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🪙 Coin Flip</h2>
+    <p>Your Wallet: <span id="wallet">Loading...</span> USD</p>
+
+    <label for="choice">Choose:</label>
+    <select id="choice">
+      <option value="heads">Heads</option>
+      <option value="tails">Tails</option>
+    </select>
+
+    <input type="number" id="betAmount" placeholder="Enter bet amount (USD)" />
+    <button onclick="flipCoin()">Flip the Coin</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.appspot.com",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          document.getElementById("wallet").innerText = snap.data().wallet_balance.toFixed(2);
+        }
+      } else {
+        alert("Please log in to play.");
+        window.location.href = "login.html";
+      }
+    });
+
+    async function flipCoin() {
+      const betAmount = parseFloat(document.getElementById("betAmount").value);
+      const choice = document.getElementById("choice").value;
+      const resultDiv = document.getElementById("result");
+
+      if (!betAmount || betAmount <= 0) {
+        return alert("Enter a valid bet amount.");
+      }
+
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      let wallet = userSnap.data().wallet_balance || 0;
+
+      if (betAmount > wallet) {
+        return alert("Insufficient balance.");
+      }
+
+      const flip = Math.random() < 0.5 ? "heads" : "tails";
+      const win = flip === choice;
+
+      const gameRef = doc(db, "games", `${Date.now()}_${currentUser.uid}`);
+      await setDoc(gameRef, {
+        user: currentUser.uid,
+        game: "coin-flip",
+        flip,
+        userChoice: choice,
+        bet: betAmount,
+        won: win,
+        timestamp: new Date()
+      });
+
+      if (win) {
+        await updateDoc(userRef, {
+          wallet_balance: wallet + betAmount
+        });
+        resultDiv.innerHTML = `🎉 It's <b>${flip}</b>! You won <b>$${betAmount.toFixed(2)}</b>!`;
+      } else {
+        await updateDoc(userRef, {
+          wallet_balance: wallet - betAmount
+        });
+        const adminStatsRef = doc(db, "adminStats", "main");
+        await setDoc(adminStatsRef, {
+          totalEarnings: increment(betAmount)
+        }, { merge: true });
+        resultDiv.innerHTML = `😢 It's <b>${flip}</b>. You lost <b>$${betAmount.toFixed(2)}</b>.`;
+      }
+
+      // Refresh wallet
+      const updatedSnap = await getDoc(userRef);
+      document.getElementById("wallet").innerText = updatedSnap.data().wallet_balance.toFixed(2);
+    }
+
+    window.flipCoin = flipCoin;
+  </script>
+</body>
+</html>

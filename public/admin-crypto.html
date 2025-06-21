@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Crypto Withdrawals</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Admin: Crypto Withdrawal Requests</h2>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Currency</th>
+          <th>Wallet Address</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="requestsTable"></tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.firebasestorage.app",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return window.location.href = "login.html";
+
+      const q = query(collection(db, "cryptoWithdrawals"), orderBy("requestedAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        const table = document.getElementById("requestsTable");
+        table.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${data.userEmail}</td>
+            <td>${data.amount}</td>
+            <td>${data.currency}</td>
+            <td>${data.address}</td>
+            <td>${data.status}</td>
+            <td>
+              ${data.status === "pending" ? `
+                <button onclick="updateStatus('${docSnap.id}', 'approved')">Approve</button>
+                <button onclick="updateStatus('${docSnap.id}', 'rejected')">Reject</button>
+              ` : data.status}
+            </td>`;
+          table.appendChild(row);
+        });
+      });
+    });
+
+    window.updateStatus = async (id, newStatus) => {
+      await updateDoc(doc(db, "cryptoWithdrawals", id), { status: newStatus });
+      alert(`Marked as ${newStatus}`);
+    };
+  </script>
+</body>
+</html>

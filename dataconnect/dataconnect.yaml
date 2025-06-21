@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "Bet-hive"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "Bet-hive"
+      cloudSql:
+        instanceId: "default"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]

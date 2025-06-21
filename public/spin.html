@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spin the Wheel - Bet-hive</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #FFA500;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    button {
+      background: #ff6f00;
+      color: white;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #e65c00;
+    }
+    #wallet {
+      font-weight: 600;
+      color: #008000;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    /* Wheel styling */
+    .wheel-container {
+      margin: 20px auto;
+      width: 300px;
+      height: 300px;
+      position: relative;
+    }
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 8px solid #ff6f00;
+      box-shadow: 0 0 15px rgba(255,111,0,0.8);
+      position: relative;
+      transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+    .segment {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      background: #ffa726;
+      border: 1px solid #e65100;
+      transform-origin: 100% 100%;
+      top: 50%;
+      right: 50%;
+      text-align: right;
+      padding-right: 10px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: white;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    /* Six segments, rotate by 60 degrees each */
+    .seg1 { transform: rotate(0deg) skewY(-30deg); background:#f44336; } /* x0 Lose */
+    .seg2 { transform: rotate(60deg) skewY(-30deg); background:#ffb74d; } /* x1.5 */
+    .seg3 { transform: rotate(120deg) skewY(-30deg); background:#4caf50; } /* x2 */
+    .seg4 { transform: rotate(180deg) skewY(-30deg); background:#f44336; } /* x0 Lose */
+    .seg5 { transform: rotate(240deg) skewY(-30deg); background:#2196f3; } /* x3 */
+    .seg6 { transform: rotate(300deg) skewY(-30deg); background:#9c27b0; } /* x5 */
+    /* Pointer */
+    .pointer {
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 30px solid #ff6f00;
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: drop-shadow(0 0 3px rgba(0,0,0,0.3));
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎡 Spin the Wheel</h2>
+    <p>Your Wallet: <span id="wallet">Loading...</span> USD</p>
+
+    <div class="wheel-container">
+      <div id="wheel" class="wheel">
+        <div class="segment seg1">x0 Lose</div>
+        <div class="segment seg2">x1.5</div>
+        <div class="segment seg3">x2</div>
+        <div class="segment seg4">x0 Lose</div>
+        <div class="segment seg5">x3</div>
+        <div class="segment seg6">x5</div>
+      </div>
+      <div class="pointer"></div>
+    </div>
+
+    <input type="number" id="betAmount" placeholder="Enter bet amount (USD)" />
+    <button id="spinBtn" onclick="spinWheel()">Spin</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc, increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDdWX5OqjGr4jX403UiR9Mcr6x4Hgf5hyM",
+      authDomain: "bet-hive-h.firebaseapp.com",
+      projectId: "bet-hive-h",
+      storageBucket: "bet-hive-h.appspot.com",
+      messagingSenderId: "870040602722",
+      appId: "1:870040602722:web:ceec7969cc4e1808c6293b",
+      measurementId: "G-SZYX62R0K6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser;
+    let wheel = document.getElementById("wheel");
+    let spinning = false;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+          document.getElementById("wallet").innerText = snap.data().wallet_balance.toFixed(2);
+        }
+      } else {
+        alert("Please log in to play.");
+        window.location.href = "login.html";
+      }
+    });
+
+    async function spinWheel() {
+      if (spinning) return;
+      const betAmount = parseFloat(document.getElementById("betAmount").value);
+      const resultDiv = document.getElementById("result");
+
+      if (!betAmount || betAmount <= 0) {
+        return alert("Enter a valid bet amount.");
+      }
+
+      const userRef = doc(db, "users", currentUser.uid);
+      const userSnap = await getDoc(userRef);
+      let wallet = userSnap.data().wallet_balance || 0;
+
+      if (betAmount > wallet) {
+        return alert("Insufficient balance.");
+      }
+
+      spinning = true;
+      resultDiv.innerHTML = "Spinning... Good luck! 🎉";
+
+      // Define segments multipliers & their angles (each 60deg)
+      const segments = [
+        { multiplier: 0, angle: 30 },   // x0 Lose
+        { multiplier: 1.5, angle: 90 }, // x1.5
+        { multiplier: 2, angle: 150 },  // x2
+        { multiplier: 0, angle: 210 },  // x0 Lose
+        { multiplier: 3, angle: 270 },  // x3
+        { multiplier: 5, angle: 330 }   // x5
+      ];
+
+      // Pick random segment
+      const selected = segments[Math.floor(Math.random() * segments.length)];
+
+      // Calculate rotation (add multiple spins for effect)
+      const spins = 5;
+      const rotation = spins * 360 + selected.angle;
+
+      // Animate wheel rotation
+      wheel.style.transition = "transform 4s cubic-bezier(0.33, 1, 0.68, 1)";
+      wheel.style.transform = `rotate(${rotation}deg)`;
+
+      // Wait for animation to finish
+      setTimeout(async () => {
+        // Log game in Firestore
+        const gameRef = doc(db, "games", `${Date.now()}_${currentUser.uid}`);
+        await setDoc(gameRef, {
+          user: currentUser.uid,
+          game: "spin-wheel",
+          multiplier: selected.multiplier,
+          bet: betAmount,
+          won: selected.multiplier > 0,
+          payout: betAmount * selected.multiplier,
+          timestamp: new Date()
+        });
+
+        if (selected.multiplier > 0) {
+          // User wins
+          await updateDoc(userRef, {
+            wallet_balance: wallet + betAmount * selected.multiplier
+          });
+          resultDiv.innerHTML = `🎉 You won $${(betAmount * selected.multiplier).toFixed(2)}!`;
+        } else {
+          // User loses
+          await updateDoc(userRef, {
+            wallet_balance: wallet - betAmount
+          });
+          const adminStatsRef = doc(db, "adminStats", "main");
+          await setDoc(adminStatsRef, {
+            totalEarnings: increment(betAmount)
+          }, { merge: true });
+
+          resultDiv.innerHTML = `😢 You lost $${betAmount.toFixed(2)}. Better luck next time!`;
+        }
+
+        // Refresh wallet display
+        const updatedSnap = await getDoc(userRef);
+        document.getElementById("wallet").innerText = updatedSnap.data().wallet_balance.toFixed(2);
+
+        // Reset wheel
+        wheel.style.transition = "none";
+        wheel.style.transform = `rotate(${selected.angle}deg)`;
+
+        spinning = false;
+      }, 4200); // match animation duration
+    }
+
+    window.spinWheel = spinWheel;
+  </script>
+</body>
+</html>
